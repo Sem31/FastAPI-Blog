@@ -6,7 +6,7 @@ from models import Blog
 from database import get_db
 from schemas import BlogSchema, ShowBlogSchema
 
-router = APIRouter()
+router = APIRouter(tags=["Blog"], prefix="/api/v1")
 
 # Define your blog-related routes here and use @router.get, @router.post, etc.
 
@@ -14,7 +14,6 @@ router = APIRouter()
 @router.get(
     "/blog",
     status_code=status.HTTP_200_OK,
-    tags=["Blog"],
 )
 def get_blog_list(db: Session = Depends(get_db)):
     blogs = db.query(Blog).all()
@@ -24,7 +23,6 @@ def get_blog_list(db: Session = Depends(get_db)):
 @router.post(
     "/blog",
     status_code=status.HTTP_201_CREATED,
-    tags=["Blog"],
 )
 def create(request: BlogSchema, db: Session = Depends(get_db)):
     new_blog = Blog(title=request.title, body=request.body, user_id=request.user_id)
@@ -37,7 +35,6 @@ def create(request: BlogSchema, db: Session = Depends(get_db)):
 @router.get(
     "/blog/{blog_id}",
     status_code=status.HTTP_200_OK,
-    tags=["Blog"],
     response_model=ShowBlogSchema,
 )
 def get_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
@@ -56,7 +53,6 @@ def get_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
 @router.delete(
     "/blog/{blog_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    tags=["Blog"],
 )
 def delete_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
     blog = db.query(Blog).filter(Blog.id == blog_id)
@@ -75,14 +71,12 @@ def delete_blog(blog_id: int, response: Response, db: Session = Depends(get_db))
 @router.put(
     "/blog/{blog_id}",
     status_code=status.HTTP_200_OK,
-    tags=["Blog"],
 )
 def update_blog(
     blog_id: int,
     request: BlogSchema,
     response: Response,
     db: Session = Depends(get_db),
-    tags=["Blog"],
 ):
     blog = db.query(Blog).filter(Blog.id == blog_id)
 
@@ -103,7 +97,6 @@ def update_blog(
     "/show/blog/{blog_id}",
     status_code=status.HTTP_200_OK,
     response_model=ShowBlogSchema,
-    tags=["Blog"],
 )
 def show_blog(blog_id: int, db: Session = Depends(get_db)):
     """Show blog by id, using response model to filter the response data.
@@ -132,7 +125,6 @@ def show_blog(blog_id: int, db: Session = Depends(get_db)):
     "/show/blog",
     status_code=status.HTTP_200_OK,
     response_model=List[ShowBlogSchema],
-    tags=["Blog"],
 )
 def show_all_blog(db: Session = Depends(get_db)):
     """Show blog by id, using response model to filter the response data.

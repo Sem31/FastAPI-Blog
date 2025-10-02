@@ -8,14 +8,13 @@ from schemas import UserSchema, ShowUserSchema
 from hashing import Hash
 
 
-router = APIRouter()
+router = APIRouter(tags=["User"], prefix="/api/v1")
 
 
 @router.post(
     "/user",
     response_model=ShowUserSchema,
     status_code=status.HTTP_201_CREATED,
-    tags=["User"],
 )
 def create_user(request: UserSchema, db: Session = Depends(get_db)):
     hashed_password = Hash.bcrypt(request.password)
@@ -30,7 +29,6 @@ def create_user(request: UserSchema, db: Session = Depends(get_db)):
     "/user/{user_id}",
     response_model=ShowUserSchema,
     status_code=status.HTTP_201_CREATED,
-    tags=["User"],
 )
 def get_user(user_id=int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -46,7 +44,6 @@ def get_user(user_id=int, db: Session = Depends(get_db)):
     "/user",
     # response_model=List[ShowUserSchema],
     status_code=status.HTTP_201_CREATED,
-    tags=["User"],
 )
 def get_user_list(db: Session = Depends(get_db)):
     user = db.query(User).all()
@@ -56,7 +53,6 @@ def get_user_list(db: Session = Depends(get_db)):
 @router.delete(
     "/user/{user_id}",
     status_code=status.HTTP_201_CREATED,
-    tags=["User"],
 )
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id)
