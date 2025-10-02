@@ -1,8 +1,10 @@
+from typing import List
+
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from models import Base, Blog
-from schemas import BlogSchema
+from schemas import BlogSchema, ShowBlogSchema
 from database import engine, get_db
 
 app = FastAPI()
@@ -80,3 +82,59 @@ def update_blog(
     )
     db.commit()
     return {"data": "Blog with id {} update successfully".format(blog_id)}
+
+
+@app.get(
+    "/show/blog/{blog_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ShowBlogSchema,
+)
+def show_blog(blog_id: int, db: Session = Depends(get_db)):
+    """Show blog by id, using response model to filter the response data.
+
+    Args:
+        blog_id (int): Blog object id
+        db (Session, optional): Database Session. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: _description_
+
+    Returns:
+        _type_: _description_
+    """
+    blog = db.query(Blog).filter(Blog.id == blog_id).first()
+
+    if not blog:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Blog with id {} not found".format(blog_id),
+        )
+    return blog
+
+
+@app.get(
+    "/show/blog",
+    status_code=status.HTTP_200_OK,
+    response_model=List[ShowBlogSchema],
+)
+def show_all_blog(db: Session = Depends(get_db)):
+    """Show blog by id, using response model to filter the response data.
+
+    Args:
+        blog_id (int): Blog object id
+        db (Session, optional): Database Session. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: _description_
+
+    Returns:
+        _type_: _description_
+    """
+    blog = db.query(Blog).all()
+
+    if not blog:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Blog with id {} not found".format(blog_id),
+        )
+    return blog
