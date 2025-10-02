@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 from schemas import BlogSchema, ShowBlogSchema
 from repository import blog as blog_repository
+from oauth2 import get_current_user
+from models import User
 
 router = APIRouter(tags=["Blog"], prefix="/api/v1")
 
@@ -15,7 +17,9 @@ router = APIRouter(tags=["Blog"], prefix="/api/v1")
     "/blog",
     status_code=status.HTTP_200_OK,
 )
-def get_blog_list(db: Session = Depends(get_db)):
+def get_blog_list(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
     return blog_repository.get_all(db)
 
 
@@ -23,7 +27,11 @@ def get_blog_list(db: Session = Depends(get_db)):
     "/blog",
     status_code=status.HTTP_201_CREATED,
 )
-def create(request: BlogSchema, db: Session = Depends(get_db)):
+def create(
+    request: BlogSchema,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return blog_repository.create(db, request)
 
 
@@ -32,7 +40,11 @@ def create(request: BlogSchema, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     response_model=ShowBlogSchema,
 )
-def get_blog(blog_id: int, db: Session = Depends(get_db)):
+def get_blog(
+    blog_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return blog_repository.get_blog(db, blog_id)
 
 
@@ -40,7 +52,11 @@ def get_blog(blog_id: int, db: Session = Depends(get_db)):
     "/blog/{blog_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_blog(blog_id: int, db: Session = Depends(get_db)):
+def delete_blog(
+    blog_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return blog_repository.destroy(db, blog_id)
 
 
@@ -52,6 +68,7 @@ def update_blog(
     blog_id: int,
     request: BlogSchema,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return blog_repository.update(db, blog_id, request.title, request.body)
 
@@ -61,7 +78,11 @@ def update_blog(
     status_code=status.HTTP_200_OK,
     response_model=ShowBlogSchema,
 )
-def show_blog(blog_id: int, db: Session = Depends(get_db)):
+def show_blog(
+    blog_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return blog_repository.get_blog(db, blog_id)
 
 
@@ -70,5 +91,7 @@ def show_blog(blog_id: int, db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
     response_model=List[ShowBlogSchema],
 )
-def show_all_blog(db: Session = Depends(get_db)):
+def show_all_blog(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
     return blog_repository.get_all(db)

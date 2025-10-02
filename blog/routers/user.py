@@ -7,6 +7,7 @@ from database import get_db
 from schemas import UserSchema, ShowUserSchema
 from hashing import Hash
 from repository import user as repository_user
+from oauth2 import get_current_user
 
 
 router = APIRouter(tags=["User"], prefix="/api/v1")
@@ -17,7 +18,11 @@ router = APIRouter(tags=["User"], prefix="/api/v1")
     response_model=ShowUserSchema,
     status_code=status.HTTP_201_CREATED,
 )
-def create_user(request: UserSchema, db: Session = Depends(get_db)):
+def create_user(
+    request: UserSchema,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return repository_user.create(db, request)
 
 
@@ -26,7 +31,11 @@ def create_user(request: UserSchema, db: Session = Depends(get_db)):
     response_model=ShowUserSchema,
     status_code=status.HTTP_201_CREATED,
 )
-def get_user(user_id=int, db: Session = Depends(get_db)):
+def get_user(
+    user_id=int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return repository_user.get_user(db, user_id)
 
 
@@ -35,7 +44,9 @@ def get_user(user_id=int, db: Session = Depends(get_db)):
     # response_model=List[ShowUserSchema],
     status_code=status.HTTP_201_CREATED,
 )
-def get_user_list(db: Session = Depends(get_db)):
+def get_user_list(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
     return repository_user.get_all(db)
 
 
@@ -43,5 +54,9 @@ def get_user_list(db: Session = Depends(get_db)):
     "/user/{user_id}",
     status_code=status.HTTP_201_CREATED,
 )
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     return repository_user.destroy(db, user_id)
