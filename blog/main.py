@@ -20,7 +20,11 @@ class BlogCreation(BaseModel):
     body: str
 
 
-@app.post("/blog", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/blog",
+    status_code=status.HTTP_201_CREATED,
+    tags=["Blog"],
+)
 def create(request: BlogSchema, db: Session = Depends(get_db)):
     new_blog = Blog(title=request.title, body=request.body)
     db.add(new_blog)
@@ -29,13 +33,21 @@ def create(request: BlogSchema, db: Session = Depends(get_db)):
     return {"data": new_blog, "Message": "Blog created"}
 
 
-@app.get("/blog", status_code=status.HTTP_200_OK)
+@app.get(
+    "/blog",
+    status_code=status.HTTP_200_OK,
+    tags=["Blog"],
+)
 def get_blog_list(db: Session = Depends(get_db)):
     blogs = db.query(Blog).all()
     return {"data": blogs}
 
 
-@app.get("/blog/{blog_id}", status_code=status.HTTP_200_OK)
+@app.get(
+    "/blog/{blog_id}",
+    status_code=status.HTTP_200_OK,
+    tags=["Blog"],
+)
 def get_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
     blog = db.query(Blog).filter(Blog.id == blog_id).first()
 
@@ -49,7 +61,11 @@ def get_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
     return {"data": blog}
 
 
-@app.delete("/blog/{blog_id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete(
+    "/blog/{blog_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["Blog"],
+)
 def delete_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
     blog = db.query(Blog).filter(Blog.id == blog_id)
 
@@ -64,12 +80,17 @@ def delete_blog(blog_id: int, response: Response, db: Session = Depends(get_db))
     return {"data": "Blog with id {} deleted successfully".format(blog_id)}
 
 
-@app.put("/blog/{blog_id}", status_code=status.HTTP_200_OK)
+@app.put(
+    "/blog/{blog_id}",
+    status_code=status.HTTP_200_OK,
+    tags=["Blog"],
+)
 def update_blog(
     blog_id: int,
     request: BlogSchema,
     response: Response,
     db: Session = Depends(get_db),
+    tags=["Blog"],
 ):
     blog = db.query(Blog).filter(Blog.id == blog_id)
 
@@ -90,6 +111,7 @@ def update_blog(
     "/show/blog/{blog_id}",
     status_code=status.HTTP_200_OK,
     response_model=ShowBlogSchema,
+    tags=["Blog"],
 )
 def show_blog(blog_id: int, db: Session = Depends(get_db)):
     """Show blog by id, using response model to filter the response data.
@@ -118,6 +140,7 @@ def show_blog(blog_id: int, db: Session = Depends(get_db)):
     "/show/blog",
     status_code=status.HTTP_200_OK,
     response_model=List[ShowBlogSchema],
+    tags=["Blog"],
 )
 def show_all_blog(db: Session = Depends(get_db)):
     """Show blog by id, using response model to filter the response data.
@@ -142,7 +165,12 @@ def show_all_blog(db: Session = Depends(get_db)):
     return blog
 
 
-@app.post("/user", response_model=ShowUserSchema, status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/user",
+    response_model=ShowUserSchema,
+    status_code=status.HTTP_201_CREATED,
+    tags=["User"],
+)
 def create_user(request: UserSchema, db: Session = Depends(get_db)):
     hashed_password = Hash.bcrypt(request.password)
     new_user = User(name=request.name, email=request.email, password=hashed_password)
@@ -156,6 +184,7 @@ def create_user(request: UserSchema, db: Session = Depends(get_db)):
     "/user/{user_id}",
     response_model=ShowUserSchema,
     status_code=status.HTTP_201_CREATED,
+    tags=["User"],
 )
 def get_user(user_id=int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -171,6 +200,7 @@ def get_user(user_id=int, db: Session = Depends(get_db)):
     "/user",
     response_model=List[ShowUserSchema],
     status_code=status.HTTP_201_CREATED,
+    tags=["User"],
 )
 def get_user_list(db: Session = Depends(get_db)):
     user = db.query(User).all()
@@ -180,6 +210,7 @@ def get_user_list(db: Session = Depends(get_db)):
 @app.delete(
     "/user/{user_id}",
     status_code=status.HTTP_201_CREATED,
+    tags=["User"],
 )
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id)
