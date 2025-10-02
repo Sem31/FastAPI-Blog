@@ -26,7 +26,7 @@ class BlogCreation(BaseModel):
     tags=["Blog"],
 )
 def create(request: BlogSchema, db: Session = Depends(get_db)):
-    new_blog = Blog(title=request.title, body=request.body)
+    new_blog = Blog(title=request.title, body=request.body, user_id=request.user_id)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
@@ -47,6 +47,7 @@ def get_blog_list(db: Session = Depends(get_db)):
     "/blog/{blog_id}",
     status_code=status.HTTP_200_OK,
     tags=["Blog"],
+    response_model=ShowBlogSchema,
 )
 def get_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
     blog = db.query(Blog).filter(Blog.id == blog_id).first()
@@ -58,7 +59,7 @@ def get_blog(blog_id: int, response: Response, db: Session = Depends(get_db)):
         )
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return {"Message": "Blog with id {} not found".format(blog_id)}
-    return {"data": blog}
+    return blog
 
 
 @app.delete(
@@ -198,7 +199,7 @@ def get_user(user_id=int, db: Session = Depends(get_db)):
 
 @app.get(
     "/user",
-    response_model=List[ShowUserSchema],
+    # response_model=List[ShowUserSchema],
     status_code=status.HTTP_201_CREATED,
     tags=["User"],
 )

@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel
 
 # from models import Blog
@@ -6,10 +7,27 @@ from pydantic import BaseModel
 class BlogSchema(BaseModel):
     title: str
     body: str
+    user_id: int
+
+
+class UserBlogSchema(BaseModel):
+    title: str
+    body: str
+
+
+class ShowUserSchema(BaseModel):
+    name: str
+    email: str
+    blogs: List[UserBlogSchema] = []
+
+    class Config:
+        orm_mode = True
 
 
 class ShowBlogSchema(BaseModel):
     title: str
+    body: str
+    creator: ShowUserSchema
 
     class Config:
         orm_mode = True
@@ -19,11 +37,3 @@ class UserSchema(BaseModel):
     name: str
     email: str
     password: str
-
-
-class ShowUserSchema(BaseModel):
-    name: str
-    email: str
-
-    class Config:
-        orm_mode = True
