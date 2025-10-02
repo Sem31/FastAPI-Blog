@@ -3,9 +3,11 @@ from typing import List
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from models import Base, Blog
-from schemas import BlogSchema, ShowBlogSchema
+from models import Base, Blog, User
+from schemas import BlogSchema, ShowBlogSchema, UserSchema, ShowUserSchema
 from database import engine, get_db
+
+from hashing import Hash
 
 app = FastAPI()
 
@@ -138,3 +140,55 @@ def show_all_blog(db: Session = Depends(get_db)):
             detail="Blog with id {} not found".format(blog_id),
         )
     return blog
+
+
+@app.post("/user", response_model=ShowUserSchema, status_code=status.HTTP_201_CREATED)
+def create_user(request: UserSchema, db: Session = Depends(get_db)):
+    hashed_password = Hash.bcrypt(request.password)
+    new_user = User(name=request.name, email=request.email, password=hashed_password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+
+@app.get(
+    "/user/{user_id}",
+    response_model=ShowUserSchema,
+    status_code=status.HTTP_201_CREATED,
+)
+def get_user(user_id=int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User with id {} not found".format(user_id),
+        )
+    return user
+
+
+@app.get(
+    "/user",
+    response_model=List[ShowUserSchema],
+    status_code=status.HTTP_201_CREATED,
+)
+def get_user_list(db: Session = Depends(get_db)):
+    user = db.query(User).all()
+    return user
+
+
+@app.delete(
+    "/user/{user_id}",
+    status_code=status.HTTP_201_CREATED,
+)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id)
+
+    if not user.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User with id {} not found".format(user_id),
+        )
+    user.delete(synchronize_session=False)
+    db.commit()
+    return {"data": "User with id {} deleted successfully".format(user_id)}
